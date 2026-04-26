@@ -8,6 +8,7 @@ import (
 	"strconv"
 )
 
+// ans: 6768
 func main() {
 	startPos := 50
 	count := 0
@@ -15,7 +16,12 @@ func main() {
 	if err != nil {
 		fmt.Println("Error reading file", err)
 	}
-	defer file.Close()
+	defer func(file *os.File) {
+		err := file.Close()
+		if err != nil {
+
+		}
+	}(file)
 
 	scanner := bufio.NewScanner(file)
 
@@ -26,7 +32,7 @@ func main() {
 		if err != nil {
 			fmt.Println("Error converting string to int", err)
 		}
-		fmt.Printf("Position before: %v\n", startPos)
+		posBeforeRotate := startPos
 
 		switch operator {
 		case "L":
@@ -35,20 +41,30 @@ func main() {
 			startPos += rotateVal
 		}
 
-		if startPos < 0 || startPos > 99 {
-			startPos = int(math.Mod(float64(startPos), 100))
+		if startPos <= 0 {
+			passZero := startPos / 100
+			startPos = startPos % 100
+			count += int(math.Abs(float64(passZero)))
 			if startPos < 0 {
 				startPos += 100
+				if posBeforeRotate != 0 {
+					count++
+				}
+			}
+			if startPos == 0 {
+				count++
 			}
 		}
 
-		if startPos == 0 {
-			count += 1
+		if startPos >= 100 {
+			passZero := startPos / 100
+			count += passZero
+			startPos = startPos % 100
 		}
-		fmt.Printf("Position after: %v, rotateVal: %v\n", startPos, rotateVal)
+		fmt.Println(count)
+
 	}
 	if err := scanner.Err(); err != nil {
 		fmt.Println("Error reading file:", err)
 	}
-	fmt.Println(count)
 }
