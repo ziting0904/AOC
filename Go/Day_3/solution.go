@@ -5,70 +5,41 @@ import (
 	"fmt"
 	"os"
 	"strconv"
-	"strings"
 )
-
-func largestSubsequence(s string, length int) string {
-	var stack []rune
-	
-	for i, char := range s {
-		// Pop smaller elements from the stack if we have enough characters 
-		// remaining in the original string to still reach our target length
-		for len(stack) > 0 && stack[len(stack)-1] < char && (len(stack)-1+(len(s)-i)) >= length {
-			stack = stack[:len(stack)-1]
-		}
-		
-		// Push the current character if the stack hasn't reached the target length
-		if len(stack) < length {
-			stack = append(stack, char)
-		}
-	}
-	
-	// Convert the slice of runes back into a string
-	var sb strings.Builder
-	for _, char := range stack {
-		sb.WriteRune(char)
-	}
-	return sb.String()
-}
 
 func part2() int {
 	file, err := os.Open("input.txt")
+	maxSize := 12
 	if err != nil {
 		fmt.Println("Error reading input file")
 	}
 	scanner := bufio.NewScanner(file)
-	result := 0
+	resultVal := 0
 	for scanner.Scan() {
+		var solution []rune
 		line := scanner.Text()
-		runes := []rune(line)
-
-		largestVal := runes[:12]
-		i := 1
-		for i < len(runes) {
-			currentVal := int(runes[i] - '0')
-			// appendToLast := false
-			for j := 0; j < len(largestVal); j++ {
-				digit := int(largestVal[j] - '0')
-
-				if currentVal > digit {
-					remaining := len(largestVal) - j
-					if remaining <= len(runes)-i {
-						largestVal = append(largestVal[:j], runes[i:i+remaining]...)
-						break
+		for i, char := range line {
+			j := 0
+			remainingStringsLength := len(line) - i
+			for j < len(solution)  {
+				if solution[j] < char {
+					if remainingStringsLength >= maxSize-j {
+						solution = solution[:j]
 					}
 				}
+				j += 1
 			}
-			i++
+			if len(solution) < maxSize {
+				solution = append(solution, char)
+			}
 		}
-		largestInt, err := strconv.Atoi(string(largestVal))
+		largestInt, err := strconv.Atoi(string(solution))
 		if err != nil {
 			fmt.Println("error converting char to string")
 		}
-		//fmt.Printf("largest int at line: %d\n", largestInt)
-		result += largestInt
+		resultVal += largestInt
 	}
-	return result
+	return resultVal
 }
 
 func part1() {
@@ -103,24 +74,8 @@ func part1() {
 		}
 		resultSlice += largestInt
 	}
-	fmt.Println(resultSlice)
 }
 
 func main() {
 	fmt.Println(part2())
-	file, err := os.Open("input.txt")
-	if err != nil {
-		fmt.Println("Error reading input file")
-	}
-	scanner := bufio.NewScanner(file)
-	result := 0
-	for scanner.Scan() {
-		text := scanner.Text()
-		val, err := strconv.Atoi(largestSubsequence(text,12))
-		if err != nil {
-			fmt.Println("error converting char to string")
-		}
-		result += val 
-	}
-	fmt.Println(result)
 }
